@@ -22,17 +22,38 @@ app.use(express.urlencoded({extended:true}));
 /* ************ START OIDC CODE ************ */
 
 // env vars from process.env
-
+const {
+  AUTH0_SECRET ,
+  AUTH0_AUDIENCE, 
+  AUTH0_CLIENT_ID,
+  AUTH0_BASE_URL 
+} = process.env
 
 // define the config object  
 
+const config = {
+  authRequired: true,
+  auth0Logout: true,
+  secret: AUTH0_SECRET ,
+  baseURL: AUTH0_AUDIENCE, 
+  clientID: AUTH0_CLIENT_ID,
+  issuerBaseURL: AUTH0_BASE_URL 
+}
   
 // auth router attaches /login, /logout, and /callback routes to the baseURL
-
+app.use(auth(config))
 
 // create a GET / route handler that sends back Logged in or Logged out
 // req.isAuthenticated is provided from the auth router
-
+app.get('/', (req, res) => {
+  res.send(req.oidc.isAuthenticated() ?
+  `<h2 style="text-align: center"> My Web App, Inc.</h2>
+    <h2> Welcome, ${req.oidc.user.name} </h2>
+    <h2> Email: ${req.oidc.user.email} </h2>
+    <img src="${req.oidc.user.picture}" alt="${req.oidc.user.name}">
+  ` 
+  : `Logged out`)
+})
 
 /* ************ END OIDC CODE ************ */
 
